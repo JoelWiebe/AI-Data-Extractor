@@ -12,6 +12,9 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, Part, FinishReason
 import vertexai.preview.generative_models as generative_models
 
+
+
+
 class TagClassifierClient:
     def __init__(self):
         vertexai.init(project=PROJECT_ID, location=LOCATION)
@@ -29,12 +32,17 @@ class TagClassifierClient:
 
         # Prompt template with instructions and expected response format (including confidence)
         prompt = (
-            "Below is a JSON object containing a heading name from a research paper followed by its paragraphs, where the key is the paragraph index and the value is the paragraph text.\n\n"
+            "The following is a JSON object containing a section heading and its paragraphs from a research paper. The keys are paragraph indices, and the values are the paragraph text:\n\n"
             f"{json_payload}\n\n"
-            f"Here is a JSON object of classification labels for variables that will be extracted from the paper:\n\n"
+            f"These are the variables to be extracted from the paper, along with their descriptions:\n\n"
             f"{TARGET_VARIABLES}\n\n"
-            "Your task is to label the paragraphs that contain data relevant to the provided extraction variables, along with your confidence (0 to 1) in each label. Provide your response in a JSON object that should adhere EXACTLY to the following format using the paragraph index as the key and a list of classification tags with confidence scores as the value, with no additional text:\n\n"
-            "{\n  \"classifications\": {\n    \"0\": [[\"ai_types\", 0.95], [\"participant_ages\", 0.82]],\n    \"1\": [[\"participant_ages\", 0.98]],\n    \"2\": []\n  }\n}\n"
+            "Classify each paragraph based on the relevance to the extraction variables. "
+            "If a paragraph is relevant to multiple variables, assign multiple labels. "
+            "For each relevant paragraph, provide a list of the applicable variable names and your confidence (0 to 1) in each label. "
+            "If a paragraph is not relevant to any variable, do not include it in the response.\n\n"
+            "The response should be a JSON object with the following format:\n\n"
+            "{\n  \"classifications\": {\n    \"[Paragraph Index]\": [[\"variable_name\", confidence], ...]\n  }\n}\n\n"
+            "Do not include any Markdown formatting in your response. Ensure the JSON is valid and does not contain any extra characters or formatting.\n"
         )
 
         # Generate classifications 
@@ -52,14 +60,11 @@ class TagClassifierClient:
             generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
         }
         
-        print(f"Prompt: {prompt}")
-
         # Call the model to predict and get results in string format
         response = self.model.generate_content(prompt, generation_config=generation_config, safety_settings=safety_settings).text
-        print(f"Response: {response}")
+        print(f"Processed section: {heading}")
 
         clean_response = remove_json_markdown(response)
-        print(f"Clean response: {clean_response}")
 
         # convert the results to a python dictionary
         response_dict = json.loads(clean_response)
@@ -95,7 +100,7 @@ def process_document(file_path, tag_classifier_client):
     paragraph_idx = 0
 
     # Initialize a dictionary to store aggregated results for each target variable
-    aggregated_data = {var_name: [] for var_name in TARGET_VARIABLES} 
+    aggregated_data = {var_name: [] for var_name in TARGET_VARIABLES.keys()} 
 
     for para in doc.paragraphs:
         # Check if the current paragraph is a heading
@@ -103,7 +108,8 @@ def process_document(file_path, tag_classifier_client):
             # If we have a previous section (heading and paragraphs), process it
             if current_heading and current_paragraphs:
                 # Classify the paragraphs in the current section using the Gemini model
-                classifications = tag_classifier_client.classify_section(current_heading, current_paragraphs, paragraph_idx - len(current_paragraphs))  
+                start_idx = paragraph_idx - len(current_paragraphs)
+                classifications = tag_classifier_client.classify_section(current_heading, current_paragraphs, start_idx)  
                 
                 # Iterate through the classified paragraphs
                 for idx, tags_with_confidences in classifications.items():
@@ -111,7 +117,7 @@ def process_document(file_path, tag_classifier_client):
                     for tag, confidence in tags_with_confidences:
                         if tag in TARGET_VARIABLES:
                             # If it's a target variable, add the paragraph index and confidence to the aggregated data
-                            aggregated_data[tag].append((int(idx), confidence))
+                            aggregated_data[tag].append((int(idx), confidence, doc.paragraphs[int(idx)].text))
                 # Clear the current_paragraphs list for the next section
                 current_paragraphs = []
 
@@ -129,7 +135,7 @@ def process_document(file_path, tag_classifier_client):
         for idx, tags_with_confidences in classifications.items():
             for tag, confidence in tags_with_confidences:
                 if tag in TARGET_VARIABLES:
-                    aggregated_data[tag].append((int(idx), confidence)) 
+                    aggregated_data[tag].append((int(idx), confidence, doc.paragraphs[int(idx)].text)) 
 
     # Return the dictionary containing aggregated data for all target variables
     return aggregated_data
@@ -153,10 +159,11 @@ def main():
                         "filename": filename,
                         "variable": var_name,
                         "paragraph_index": idx, 
-                        "confidence": confidence
+                        "confidence": confidence,
+                        "text": text
                     }
                     for var_name, paragraphs in aggregated_data.items()
-                    for idx, confidence in paragraphs
+                    for idx, confidence, text in paragraphs
                 )
 
             except Exception as e:
