@@ -8,6 +8,7 @@ This Python script leverages the power of Google's Gemini language model via Ver
 - **Targeted Data Extraction:**  Extracts specific information using Gemini based on prompts tailored to the desired data types (e.g., participant ages).
 - **Structured Output:** Produces an Excel (.xlsx) file with one row per extracted variable, including the filename, paragraph, sentence, and extracted value.
 - **Timestamped Results:** Appends a timestamp to the output file name for easy tracking.
+- **Unit Tests:** Includes a test suite (test_ai_data_extractor.py) to verify the script's functionality.
 
 ## Prerequisites
 
@@ -25,7 +26,6 @@ This Python script leverages the power of Google's Gemini language model via Ver
    ```bash
    git clone https://github.com/JoelWiebe/AI-Data-Extractor.git
    cd ai-data-extractor
-   pip install -r requirements.txt
    ```
 
 2. **Install Dependencies:**
@@ -60,3 +60,9 @@ GEMINI_MODEL=gemini-1.5-flash-001 # or your preferred model
 
 4. **View Results:**
 - The extracted data will be saved in an Excel file (e.g., extracted_data_2024-07-08_15-32-10.xlsx) in the output_xlsx directory.
+
+## Running Tests
+To run the unit tests, use the following command:
+```bash
+python -m unittest test_ai_data_extractor.py
+```
