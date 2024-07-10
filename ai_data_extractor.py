@@ -35,7 +35,7 @@ class TagClassifierClient:
             "The following is a JSON object containing a section heading and its paragraphs from a research paper. The keys are paragraph indices, and the values are the paragraph text:\n\n"
             f"{json_payload}\n\n"
             f"These are the variables to be extracted from the paper, along with their descriptions:\n\n"
-            f"{TARGET_VARIABLES}\n\n"
+            f"{TARGET_VARIABLES_DESCRIPTIONS}\n\n"
             "Classify each paragraph based on the relevance to the extraction variables. "
             "If a paragraph is relevant to multiple variables, assign multiple labels. "
             "For each relevant paragraph, provide a list of the applicable variable names and your confidence (0 to 1) in each label. "
