@@ -3,3 +3,4 @@ __pycache__/
 .env
 input_docs/*
 output_xlsx/*
+codebook.xlsx

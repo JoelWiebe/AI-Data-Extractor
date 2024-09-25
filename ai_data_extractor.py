@@ -1,16 +1,13 @@
 import os
 import json
 import pandas as pd
-import vertexai
-from vertexai.generative_models import GenerativeModel
 import docx
 from google.cloud import aiplatform
 import datetime
 from config import *
 import re
 import vertexai
-from vertexai.generative_models import GenerativeModel, Part, FinishReason
-import vertexai.preview.generative_models as generative_models
+from vertexai.generative_models import GenerativeModel
 
 
 
@@ -56,22 +53,12 @@ class ParagraphClassifierClient:
         print(f"\nClassify section prompt:\n\n{prompt}")
 
         # Generate classifications 
-        generation_config = {
-            "max_output_tokens": 8192,
-            "temperature": 0.2,
-            "top_p": 0.95,
-            "top_k": 40
-        }
+        generation_config = GENERATION_CONFIGURATION
 
-        safety_settings = {
-            generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-            generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        }
+        safety_settings = SAFETY_SETTINGS
         
         # Call the model to predict and get results in string format
-        response = self.model.generate_content(prompt, generation_config=generation_config, safety_settings=safety_settings).text
+        response = self.model.generate_content([prompt], generation_config=generation_config, safety_settings=safety_settings).text
         print(f"\nClassify section response:\n\n{response}")
 
         clean_response = remove_json_markdown(response)
@@ -126,22 +113,12 @@ class ParagraphClassifierClient:
 
                 print(f"\nExtraction prompt:\n\n{prompt}")
 
-                generation_config = {
-                    "max_output_tokens": 8192,
-                    "temperature": 0.2,
-                    "top_p": 0.95,
-                    "top_k": 40
-                }
+                generation_config = GENERATION_CONFIGURATION
 
-                safety_settings = {
-                    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                }
+                safety_settings = SAFETY_SETTINGS
 
                 # Generate and parse response (remember to remove any markdown)
-                response = self.model.generate_content(prompt, generation_config=generation_config, safety_settings=safety_settings).text
+                response = self.model.generate_content([prompt], generation_config=generation_config, safety_settings=safety_settings).text
                 print(f"\nExtraction response:\n\n{response}")  # Print results for debugging
                 clean_response = remove_json_markdown(response)
                 response_dict = json.loads(clean_response)
@@ -157,8 +134,8 @@ class ParagraphClassifierClient:
 
         print(f"Extraction results:\n{extraction_results}")
         return extraction_results
-    
 
+  
 def remove_json_markdown(text):
     pattern = re.compile(r'```json\s*(.*?)\s*```', re.DOTALL)
     return pattern.sub(r'\1', text)
@@ -212,7 +189,7 @@ def process_document(file_path, par_classifier_client):
 
     for para in doc.paragraphs:
         # Check if the current paragraph is a heading
-        if para.style.name == 'Heading 1':
+        if para.style.name == 'Heading 1' or para.style.name == 'Heading 2':
             # If we have a previous section (heading and paragraphs), process it
             if current_heading and current_paragraphs:
                 
@@ -248,7 +225,7 @@ def main():
 
     for filename in os.listdir(INPUT_DIR):
         file_path = os.path.join(INPUT_DIR, filename)
-        if os.path.isfile(file_path) and file_path.endswith(".docx"):
+        if os.path.isfile(file_path) and file_path.endswith(".docx") and not filename.startswith("~"):
             try:
                 classified_paragraph_data = process_document(file_path, par_classifier_client)
 
