@@ -28,8 +28,10 @@ This Python script leverages the power of Google's Gemini language model via Ver
    cd ai-data-extractor
    ```
 
-2. **Install Dependencies:**
+2. **Create Virtual Environment and Install Dependencies:**
    ```bash
+   python -m venv venv
+   source ./venv/bin/activate
    pip install -r requirements.txt
    ```
 
