@@ -119,8 +119,8 @@ Google Colab provides a free, cloud-based environment that can be suitable for r
         project_path = '/content/drive/My Drive/ai_data_projects/'
         os.makedirs(project_path, exist_ok=True)
         print(f"Project folder created at: {project_path}")
-        %cd {project_path}"
-        !git clone [https://github.com/JoelWiebe/ai-data-extractor.git](https://github.com/JoelWiebe/ai-data-extractor.git)
+        %cd '/content/drive/My Drive/ai_data_projects/'
+        !git clone https://github.com/JoelWiebe/ai-data-extractor.git
         %cd ai-data-extractor
         ```
         This brings all your scripts but not the `codebook.xlsx` or docx files.
@@ -142,28 +142,17 @@ Google Colab provides a free, cloud-based environment that can be suitable for r
     auth.authenticate_user()
     print('Colab Authenticated with GCP.')
 
-    # Set Environment Variables for config.py (if it uses os.getenv())
-    # Replace with your actual GCP details. These must be set BEFORE your script runs.
-    os.environ['PROJECT_ID'] = 'your-gcp-project-id'
-    os.environ['LOCATION'] = 'your-gcp-location' # e.g., 'global'
+    # Enable: "See, edit, create and delete all of your Google Drive files" and
+    # Enable: "See, edit, configure and delete your Google Cloud data and see the email address for your Google Account..."
+
+    os.environ['PROJECT_ID'] = 'your-gcp-project-id' # replace with your Vertex AI project ID
+    os.environ['LOCATION'] = 'global' # or your preferred location
     os.environ['GEMINI_MODEL'] = 'gemini-2.5-flash-preview-05-20' # or your preferred model
 
-    # Example: If your config.py expects INPUT_DIR, OUTPUT_DIR, CODEBOOK_FILEPATH
-    # as environment variables, or if you want to override its defaults for Colab:
-    # (Ensure these paths exist in your Colab environment / mounted Drive)
-    # os.environ['INPUT_DIR'] = '/content/drive/MyDrive/ai_data_project/input_docs'
-    # os.environ['OUTPUT_DIR'] = '/content/drive/MyDrive/ai_data_project/output_xlsx'
-    # If codebook.xlsx is in the cloned repo:
-    # os.environ['CODEBOOK_FILEPATH'] = '/content/ai-data-extractor/codebook.xlsx'
-    # Or:
-    # os.environ['CODEBOOK_FILEPATH'] = '/content/drive/MyDrive/ai_data_project/codebook.xlsx' # If codebook is in Drive
-    ```
-    **Important:** If your `config.py` defines paths like `INPUT_DIR` statically (e.g., `INPUT_DIR = "input_docs"`), you must ensure these relative paths correctly align with your working directory in Colab (`%cd ai-data-extractor`) and that your data is placed accordingly (e.g., create `input_docs` inside `/content/ai-data-extractor/` and upload files there, or modify `config.py` to use absolute Drive paths).
-
 6.  **Run the Data Extraction Script:**
-    Make sure you are in the correct directory where `ai_data_extractor.py` is located (e.g., `/content/ai-data-extractor/` if cloned).
+    Make sure you are in the correct directory where `ai_data_extractor.py` is located (e.g., `/content/My Dirve/ai-data-projects/ai-data-extractor/` if cloned).
     ```python
-    !python3 ai_data_extractor.py
+    !python3 ai-data-extractor.py
     ```
 
 7.  **Access Output:** The generated Excel file will be saved to the `OUTPUT_DIR` you configured. If this is on Google Drive, you'll find it there. If it's in Colab's temporary session storage, you'll need to download it from the Colab file browser before the session ends.
