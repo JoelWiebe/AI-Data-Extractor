@@ -113,25 +113,25 @@ Google Colab provides a free, cloud-based environment that can be suitable for r
     Authorize access when prompted. Your Google Drive will be available at `/content/drive/MyDrive/`. It's recommended to create a project folder in your Drive (e.g., `MyDrive/ai_data_project/`).
 
 3.  **Set up Project Files:**
-    * **Option A: Clone your GitHub Repository (Recommended):**
+    * **Step 1: Clone your GitHub Repository (Recommended):**
         ```python
-        %cd /content/
-        !git clone [https://github.com/JoelWiebe/ai-data-extractor.git](https://github.com/JoelWiebe/ai-data-extractor.git) # Use your repo URL
+        import os
+        project_path = '/content/drive/My Drive/ai_data_projects/'
+        os.makedirs(project_path, exist_ok=True)
+        print(f"Project folder created at: {project_path}")
+        %cd {project_path}"
+        !git clone [https://github.com/JoelWiebe/ai-data-extractor.git](https://github.com/JoelWiebe/ai-data-extractor.git)
         %cd ai-data-extractor
         ```
-        This brings all your scripts and `codebook.xlsx` (if committed) into the Colab environment.
-    * **Option B: Upload Files Manually:**
-        * Use the Colab file browser (folder icon on the left sidebar) to upload `ai_data_extractor.py`, `config.py`, `utils.py`, and `codebook.xlsx`.
-        * Create an `input_docs` directory in Colab (e.g., `/content/input_docs` or link to Drive: `/content/drive/MyDrive/my_ai_project/input_docs`) and upload your DOCX files there.
+        This brings all your scripts but not the `codebook.xlsx` or docx files.
+    * **Step 2: Upload Files Manually:**
+        * Use the Colab file browser (folder icon on the left sidebar) to upload `codebook.xlsx`.
+        * Create an `input_docs` directory in Colab (e.g., `/content/drive/MyDrive/my_ai_project/input_docs`) and upload your DOCX files there.
         * Create an `output_xlsx` directory.
 
 4.  **Install Dependencies:** Run this cell to install necessary packages (assuming you have `requirements.txt` in your cloned repo).
     ```python
     !pip install -r requirements.txt
-    ```
-    If you don't have `requirements.txt`, install manually:
-    ```python
-    !pip install python-docx pandas openpyxl google-cloud-aiplatform[generative_ai] python-dotenv
     ```
 
 5.  **Authenticate to Google Cloud:** Run this cell to authenticate your Colab session.
@@ -145,8 +145,8 @@ Google Colab provides a free, cloud-based environment that can be suitable for r
     # Set Environment Variables for config.py (if it uses os.getenv())
     # Replace with your actual GCP details. These must be set BEFORE your script runs.
     os.environ['PROJECT_ID'] = 'your-gcp-project-id'
-    os.environ['LOCATION'] = 'your-gcp-location' # e.g., 'us-central1'
-    os.environ['GEMINI_MODEL'] = 'gemini-1.5-flash-001' # or your preferred model
+    os.environ['LOCATION'] = 'your-gcp-location' # e.g., 'global'
+    os.environ['GEMINI_MODEL'] = 'gemini-2.5-flash-preview-05-20' # or your preferred model
 
     # Example: If your config.py expects INPUT_DIR, OUTPUT_DIR, CODEBOOK_FILEPATH
     # as environment variables, or if you want to override its defaults for Colab:
