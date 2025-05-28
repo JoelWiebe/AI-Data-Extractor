@@ -82,22 +82,26 @@ class TestExtractTargetVariables(unittest.TestCase):
 
     def test_extract_target_variables(self):
         # Get classified paragraphs data (using the same document as TestProcessDocument)
-        classified_paragraphs_data = process_document(self.test_doc_path, self.par_classifier_client)
+        classified_data_dict, indexed_content_strings, document_content_pieces = process_document(self.test_doc_path, self.par_classifier_client)
+        
+        # If process_document could have failed and returned, e.g., (None, None, None) or just ({}, [], [])
+        # you might want to check if classified_data_dict is actually a dict here before proceeding.
+        # For example, if not classified_data_dict and not indexed_content_strings:
+        #    self.fail("process_document did not return valid data, possibly due to file error seen earlier.")
 
-        # Extract target variables
-        extracted_results = self.par_classifier_client.extract_target_variables(classified_paragraphs_data)
+        # Extract target variables using the first element of the tuple
+        extracted_results = self.par_classifier_client.extract_target_variables(classified_data_dict)
 
         # Assertions
-        self.assertIsNotNone(extracted_results)  # Check if results are returned
-        self.assertGreater(len(extracted_results), 0)  # Check if any variables were extracted
+        self.assertIsNotNone(extracted_results)
+        self.assertGreater(len(extracted_results), 0)
 
-        # Check the structure and content of the results (modified loop)
-        for var_name, extraction_info in extracted_results.items():  # Iterate over var_name and extraction_info directly
+        for var_name, extraction_info in extracted_results.items():
             self.assertIn(var_name, TARGET_VARIABLES) 
             self.assertIn("value", extraction_info)
             self.assertIn("confidence", extraction_info)
             self.assertIn("indices", extraction_info)
-            self.assertIn("justification", extraction_info) # Include justification check
+            self.assertIn("justification", extraction_info)
             self.assertIsInstance(extraction_info["confidence"], (float, int))
             self.assertTrue(0 <= extraction_info["confidence"] <= 1)
             self.assertIsInstance(extraction_info["indices"], list)

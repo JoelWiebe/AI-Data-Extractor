@@ -1,3 +1,4 @@
+# utils.py
 import pandas as pd
 
 def validate_excel_spreadsheet(filepath):
@@ -14,8 +15,8 @@ def validate_excel_spreadsheet(filepath):
   try:
       df = pd.read_excel(filepath)
 
-      # Define the required columns
-      required_columns = ["Domain", "Variable", "Description", "Example", "Chain_of_Thought"]
+      # Define the required columns - UPDATED
+      required_columns = ["Domain", "Variable", "Description", "Example", "Notes/Questions"] # CHANGED "Chain_of_Thought" to "Notes/Questions"
 
       # Check if all required columns are present
       if not all(col in df.columns for col in required_columns):
@@ -81,7 +82,7 @@ def create_target_variables(filepath):
 
   Returns:
       dict: A dictionary where keys are variable names and values are dictionaries 
-            containing their description, examples, and chain of thought.
+            containing their description, examples, and notes/questions.
   """
 
   try:
@@ -97,26 +98,27 @@ def create_target_variables(filepath):
 
       # Check if Variable or Description is empty, and report the row number (index + 1, as Excel rows start from 1)
       if pd.isna(variable) or pd.isna(description) or variable == "" or description == "":
-        raise ValueError(f"Error: 'Variable' and 'Description' columns cannot be empty. Empty value found at row {index + 1}.")
+        raise ValueError(f"Error: 'Variable' and 'Description' columns cannot be empty. Empty value found at row {index + 2}.") # Excel rows are 1-based, header is 1, so data starts at 2. index is 0-based.
 
-      # Handle empty Example and Chain_of_Thought
+      # Handle empty Example
       if pd.isna(row["Example"]) or row["Example"] == "":
         examples = []  # Empty list for missing examples
-      elif isinstance(row["Example"], int) or isinstance(row["Example"], float):
-         examples = [row["Example"]]
+      elif isinstance(row["Example"], (int, float)): # Simplified check for int/float
+         examples = [str(row["Example"])] # Convert numbers to string for consistency if examples are usually text
       else:
-        examples = [ex.strip() for ex in row["Example"].split(";") if ex.strip()]
+        examples = [ex.strip() for ex in str(row["Example"]).split(";") if ex.strip()]
 
-      if pd.isna(row["Chain_of_Thought"]) or row["Chain_of_Thought"] == "":
-        chain_of_thought = ""  # Empty string for missing chain of thought
+      # Handle empty Notes/Questions - UPDATED
+      if pd.isna(row["Notes/Questions"]) or row["Notes/Questions"] == "": 
+        notes_questions_text = ""  # Empty string for missing notes/questions
       else:
-        chain_of_thought = row["Chain_of_Thought"]
+        notes_questions_text = str(row["Notes/Questions"]) 
 
-      # Add the variable and its details to the dictionary
+      # Add the variable and its details to the dictionary 
       target_variables[variable] = {
         "description": description,
         "examples": examples,
-        "chain_of_thought": chain_of_thought
+        "notes_questions": notes_questions_text 
       }
 
     return target_variables
@@ -124,9 +126,12 @@ def create_target_variables(filepath):
   except FileNotFoundError:
     print(f"Error: File not found at {filepath}")
     return None
-  except ValueError as e:
-    print(f"Error: {e}")
+  except ValueError as e: # Specific error from our check
+    print(e) # Print the custom error message directly
+    return None
+  except KeyError as e: # Handles if "Notes/Questions" or other expected columns are missing after validation (should be caught by validate_excel_spreadsheet)
+    print(f"Error: Missing expected column in Excel file: {e}. Ensure your codebook.xlsx has a 'Notes/Questions' column.")
     return None
   except Exception as e:
-    print(f"Error: An error occurred while reading the spreadsheet: {e}")
+    print(f"Error: An error occurred while reading the spreadsheet in create_target_variables: {e}")
     return None

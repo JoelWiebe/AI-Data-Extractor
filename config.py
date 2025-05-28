@@ -17,10 +17,17 @@ OUTPUT_DIR = "output_xlsx"
 # Codebook Filepath
 CODEBOOK_FILEPATH = "./codebook.xlsx"
 
+# Retry Configuration for LLM API Calls
+MAX_API_RETRIES = 3  # Total number of attempts will be 1 initial + MAX_RETRIES
+RETRY_DELAY_SECONDS = 5  # Initial delay in seconds for the first retry
+RETRY_BACKOFF_FACTOR = 2 # Factor for exponential backoff (e.g., 5s, 10s, 20s)
+MAX_INVALID_LABEL_WARNINGS_PER_DOC = 0 # Set to 0 to stop on the first warning for a document
+
+
 # Model configurations
 GENERATION_CONFIGURATION = {
     "max_output_tokens": 8192,
-    "temperature": 0.2,
+    "temperature": 0.0,
     "top_p": 0.5,
 }
 SAFETY_SETTINGS = [
