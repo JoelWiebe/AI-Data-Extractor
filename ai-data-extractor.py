@@ -505,7 +505,7 @@ def process_document(file_path: str, par_classifier_client: 'ParagraphClassifier
         content_string = raw_piece_data["content"]
         style_name = raw_piece_data["style"]
         
-        is_heading_1 = style_name == 'Heading 1' # Assuming exact style names from previous script output
+        is_heading_1 = style_name == 'Heading 1'
         is_heading_2 = style_name == 'Heading 2'
         is_any_heading = is_heading_1 or is_heading_2
 
@@ -584,7 +584,7 @@ def process_document(file_path: str, par_classifier_client: 'ParagraphClassifier
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    par_classifier_client = ParagraphClassifierClient() # Assuming class is defined
+    par_classifier_client = ParagraphClassifierClient()
     
     all_results_for_excel = []
     processing_halted_early = False
@@ -604,7 +604,7 @@ def main():
             # Functions called here (process_document, which calls client methods)
             # can raise RuntimeError after their internal retries fail.
             classified_paragraph_data, indexed_content_strings, document_content_pieces_info = \
-                process_document(file_path, par_classifier_client) # Assuming process_document is defined
+                process_document(file_path, par_classifier_client) 
             
             if not indexed_content_strings: # Check if process_document yielded any content
                 print(f"No processable content found in {filename} or processing stopped early within it. Skipping extraction for this file.")

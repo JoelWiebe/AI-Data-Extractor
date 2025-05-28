@@ -26,7 +26,7 @@ MAX_INVALID_LABEL_WARNINGS_PER_DOC = 0 # Set to 0 to stop on the first warning f
 
 # Model configurations
 GENERATION_CONFIGURATION = {
-    "max_output_tokens": 8192,
+    "max_output_tokens": 32768,
     "temperature": 0.0,
     "top_p": 0.5,
 }
