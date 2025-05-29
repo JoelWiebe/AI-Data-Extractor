@@ -40,34 +40,70 @@ class ParagraphClassifierClient:
             )
         
     def _handle_llm_response_issues(self, response_obj, task_description):
-        """Checks for issues like MAX_TOKENS or SAFETY in the response candidate using string comparison for finish_reason."""
+        """
+        Checks for issues like MAX_TOKENS or SAFETY in the response candidate.
+        If MAX_TOKENS, attempts to include any partially received text in the error.
+        """
         if not response_obj.candidates:
             raise ValueError(f"{task_description} failed: Response object has no candidates.")
         
-        candidate = response_obj.candidates[0] 
-        
-        # Get the string name of the finish reason
+        candidate = response_obj.candidates[0]
         finish_reason_name = candidate.finish_reason.name if candidate.finish_reason else "UNKNOWN"
 
-        # Compare finish_reason by its string name
+        # Attempt to extract any partial text, regardless of finish_reason initially
+        # This helps in logging what was received, even if an error is raised later.
+        partial_text_received = "[No text parts found in candidate content]" # Default message
+        if candidate.content and candidate.content.parts:
+            try:
+                # Join text from all available parts
+                collected_parts_text = "".join(part.text for part in candidate.content.parts if hasattr(part, 'text') and part.text is not None)
+                if collected_parts_text:
+                    partial_text_received = collected_parts_text
+                # If collected_parts_text is empty, the default message remains.
+            except Exception as e_text_extraction:
+                partial_text_received = f"[Error attempting to extract partial text: {str(e_text_extraction)}]"
+        
+        # Now check for specific finish reasons
         if finish_reason_name == "MAX_TOKENS":
-            raise ValueError(f"{task_description} stopped due to MAX_TOKENS. Output was truncated. Candidate: {candidate}")
+            error_message = (
+                f"{task_description} stopped due to MAX_TOKENS. Output was truncated.\n"
+                f"Partially Received Text: <<<{partial_text_received}>>>\n"
+                f"Full Candidate Details (for debugging): {candidate}"
+            )
+            raise ValueError(error_message)
 
         if finish_reason_name == "SAFETY":
-            raise ValueError(f"{task_description} blocked by safety filters. Safety Ratings: {candidate.safety_ratings}. Candidate: {candidate}")
+            error_message = (
+                f"{task_description} blocked by safety filters.\n"
+                f"Partially Received Text (if any, typically none for SAFETY block): <<<{partial_text_received}>>>\n"
+                f"Safety Ratings: {candidate.safety_ratings}.\n"
+                f"Full Candidate Details (for debugging): {candidate}"
+            )
+            raise ValueError(error_message)
 
-        # Check for other non-successful, non-unspecified finish reasons
-        # Common successful reasons are "STOP" and sometimes "FINISH_REASON_UNSPECIFIED" (if content is present)
-        # Other reasons like "RECITATION", "OTHER" might indicate issues.
         if finish_reason_name not in ["STOP", "FINISH_REASON_UNSPECIFIED"]:
-            raise ValueError(f"{task_description} finished with unexpected reason: {finish_reason_name}. Candidate: {candidate}")
+            # For other unexpected finish reasons
+            error_message = (
+                f"{task_description} finished with unexpected reason: {finish_reason_name}.\n"
+                f"Received Text (if any): <<<{partial_text_received}>>>\n"
+                f"Full Candidate Details (for debugging): {candidate}"
+            )
+            raise ValueError(error_message)
         
-        # If finish_reason was MAX_TOKENS or SAFETY, the above checks would have already raised an error.
-        # This check is for cases where finish_reason might be STOP or UNSPECIFIED, but content is still missing.
-        if not candidate.content or not candidate.content.parts:
-            raise ValueError(f"{task_description} response candidate content has no parts (and thus no text). Finish reason: {finish_reason_name}. Candidate: {candidate}")
+        # If finish_reason is STOP or UNSPECIFIED, but the extracted text is effectively empty
+        # (which implies candidate.content or candidate.content.parts was empty or had no text)
+        if not partial_text_received or partial_text_received == "[No text parts found in candidate content]":
+             # This check handles cases where finish_reason is STOP/UNSPECIFIED but content is still missing.
+            error_message = (
+                f"{task_description} response candidate content appears empty or has no text, "
+                f"despite finish_reason being '{finish_reason_name}'.\n"
+                f"Attempted Text Extraction: <<<{partial_text_received}>>>\n"
+                f"Full Candidate Details (for debugging): {candidate}"
+            )
+            raise ValueError(error_message)
 
-        return response_obj.text
+        # If all checks pass and text was successfully extracted (i.e., partial_text_received is the full text)
+        return partial_text_received
 
     def classify_section(self, heading: str, section_content_strings: list[str], section_global_start_idx: int) -> dict:
         """
