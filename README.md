@@ -183,6 +183,37 @@ Google Colab provides a free, cloud-based environment that can be suitable for r
 * The quality of the input DOCX and the clarity of your `codebook.xlsx` (especially descriptions and "Notes/Questions") significantly impact results.
 * Unexpected model outputs (e.g., incorrect JSON formatting, unexpected labels) are handled with warnings and retries, but output still requires human validation. The script attempts to gracefully handle malformed JSON from the model or unexpected labels by warning and skipping, or stopping if errors persist after retries or if too many semantic warnings occur for a document (if `MAX_INVALID_LABEL_WARNINGS_PER_DOC` is set accordingly).
 
+## Error Handling and Resuming Processing
+
+The script is designed to save any successfully processed data before exiting due to an unrecoverable error (like repeated API failures or critical issues with a specific document). The output Excel file will be named with a suffix like `_ERROR_INCOMPLETE` or `_USER_INTERRUPTED_PARTIAL` in such cases.
+
+If an error occurs and the script halts:
+
+1.  **Identify Processed Files:**
+    * Open the partially saved Excel workbook (e.g., `extracted_data_..._ERROR_INCOMPLETE.xlsx`).
+    * Note the unique filenames listed in the "filename" column. These documents were successfully processed (at least up to the point of extraction for the variables listed).
+    * Move these corresponding `.docx` files from your `input_docs` directory to a new, separate subfolder (e.g., `input_docs/Completed/`).
+
+2.  **Identify the Problematic File:**
+    * The console output when the script halted will typically indicate the last file it was attempting to process when the error occurred (e.g., `Processing was halted due to an error: File: problematic_document.docx, Critical Error: ...`).
+    * Move this specific problematic `.docx` file from `input_docs` to a different new subfolder (e.g., `input_docs/Pending_Review/`).
+
+3.  **Resume Processing Remaining Files:**
+    * Run the `ai_data_extractor.py` script again. Since the successfully processed files and the identified problematic file have been moved out of the `input_docs` directory, the script will continue with the remaining unprocessed DOCX files.
+
+4.  **Address Problematic Files:**
+    * Once all other files are successfully processed (and their DOCX files also moved to your `input_docs/Completed/` folder), you can focus on the file(s) in `input_docs/Pending_Review/`.
+    * Move one problematic file at a time back into the main `input_docs` directory.
+    * Try running the script again, focusing on this single file.
+    * **Troubleshooting:**
+        * Check the console output for specific error messages related to this file.
+        * Consider if the `MAX_TOKENS` limit was hit (see "API Rate Limits & Errors" section above). You might need to adjust `max_output_tokens` in `config.py` temporarily or consider if the document section is exceptionally large for the classification/extraction task.
+        * Examine the DOCX file itself for any unusual formatting or potential corruption.
+        * If the issue seems to be with how the LLM is responding (e.g., consistently malformed JSON, incorrect labels despite clear prompts), you might need to debug the prompt engineering for that specific type of content or report the issue if it seems like a bug in the script's logic.
+        * You can also reduce `MAX_INVALID_LABEL_WARNINGS_PER_DOC` in `config.py` to a low number (like 0 or 1) to make the script stop more quickly if the issue is related to the "Classified label '...' is not a predefined paragraph tag" warnings, helping you pinpoint which section is causing the model to respond unexpectedly.
+
+By following these steps, you can manage errors, ensure already processed data is saved, and systematically work through a large batch of documents.
+
 ### File Structure (Illustrative)
 
 * `ai_data_extractor.py`: Main script for classification and extraction from DOCX.
