@@ -107,6 +107,8 @@ Google Colab provides a free, cloud-based environment that can be suitable for r
 
 2.  **Mount Google Drive:** This allows Colab to access files you store in your Drive. Run this code cell:
     ```python
+    from google.colab import auth
+    auth.authenticate_user()
     from google.colab import drive
     drive.mount('/content/drive')
     ```
