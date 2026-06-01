@@ -236,3 +236,9 @@ Contributions are welcome! Please fork the repository, make your changes, and su
 ## License
 
 This project is licensed under the [MIT License](LICENSE.txt). *(Ensure you have a `LICENSE.txt` file in your repository with the MIT License text if you choose this license).*
+
+## Contact
+
+For questions regarding this code, please contact:
+* **Name:** Joel Wiebe
+* **Email:** [joel.wiebe@utoronto.ca](mailto:joel.wiebe@utoronto.ca)
