@@ -241,4 +241,4 @@ This project is licensed under the [MIT License](LICENSE.txt). *(Ensure you have
 
 For questions regarding this code, please contact:
 * **Name:** Joel Wiebe
-* **Email:** [joel.wiebe@utoronto.ca](mailto:joel.wiebe@utoronto.ca)
+* **Email:** [joel.wiebe@mail.utoronto.ca](mailto:joel.wiebe@mail.utoronto.ca)
