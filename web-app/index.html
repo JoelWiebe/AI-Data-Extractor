@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Data Extractor | Systematic Review Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Main Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <div class="logo-orb"></div>
+        <h1>AI Data Extractor</h1>
+      </div>
+      <div class="header-actions">
+        <span class="status-badge secure-badge">
+          <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+          Client-Only Sandbox
+        </span>
+        <button type="button" id="btn-open-settings" class="btn btn-secondary btn-icon">
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.91l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.73c-.11.2-.06.47.12.61l2.03 1.58c-.04.3-.06.61-.06.91s.02.61.06.91l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+          </svg>
+          API Settings
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Layout (Sidebar + Wizard Workspace) -->
+    <div class="app-layout">
+      
+      <!-- Left Column: Stepper Sidebar -->
+      <aside class="app-sidebar">
+        <nav class="stepper-nav">
+          <div class="step-item active" data-step="0" id="step-nav-0">
+            <div class="step-marker">0</div>
+            <div class="step-label">
+              <span class="step-title">Welcome</span>
+              <span class="step-status">Onboarding</span>
+            </div>
+          </div>
+          <div class="step-item disabled" data-step="1" id="step-nav-1">
+            <div class="step-marker">1</div>
+            <div class="step-label">
+              <span class="step-title">Initialize Project</span>
+              <span class="step-status">Pending folder selection</span>
+            </div>
+          </div>
+          <div class="step-item disabled" data-step="2" id="step-nav-2">
+            <div class="step-marker">2</div>
+            <div class="step-label">
+              <span class="step-title">Manuscript Scan</span>
+              <span class="step-status">No files parsed</span>
+            </div>
+          </div>
+          <div class="step-item disabled" data-step="3" id="step-nav-3">
+            <div class="step-marker">3</div>
+            <div class="step-label">
+              <span class="step-title">Configure Codebook</span>
+              <span class="step-status">Variables pending</span>
+            </div>
+          </div>
+          <div class="step-item disabled" data-step="4" id="step-nav-4">
+            <div class="step-marker">4</div>
+            <div class="step-label">
+              <span class="step-title">Convert &amp; Verify PDFs</span>
+              <span class="step-status">Page-by-page sign-off</span>
+            </div>
+          </div>
+          <div class="step-item disabled" data-step="5" id="step-nav-5">
+            <div class="step-marker">5</div>
+            <div class="step-label">
+              <span class="step-title">Run Extraction</span>
+              <span class="step-status">HITL loop locked</span>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Progress Tracker checklist file indicator -->
+        <div class="progress-file-status">
+          <span class="progress-dot"></span>
+          <span id="progress-file-text">No active project progress file</span>
+        </div>
+      </aside>
+
+      <!-- Right Column: Wizard Content Workspace -->
+      <main class="wizard-workspace">
+        
+        <!-- Browser Compatibility Alert -->
+        <div id="browser-warning" class="alert-banner error-banner hidden animate-fade-in">
+          <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          <span>
+            <strong>Unsupported Browser:</strong> Your browser does not support the File System Access API. Please use Google Chrome, Microsoft Edge, or Brave to enable directory integration.
+          </span>
+        </div>
+
+        <!-- VIEW 0: Onboarding Welcome Screen -->
+        <div id="view-step-0" class="wizard-view active animate-fade-in">
+          <section class="card onboarding-card">
+            <div class="card-header">
+              <h2>Secure Client-Side Systematic Review Platform</h2>
+              <p class="subtitle">Extract data from academic papers securely using a local-only workflow.</p>
+            </div>
+            <div class="card-body">
+              <div class="onboarding-grid">
+                <div class="onboarding-info">
+                  <h3>How It Works</h3>
+                  <p>In order to protect research ethics, intellectual property, and institutional confidentiality, this application operates on a <strong>Serverless Client-Only Architecture</strong>:</p>
+                  <ul>
+                    <li>No database or servers are managed by us. The website acts only as a static package delivered to your browser.</li>
+                    <li>The browser requires read/write access to a single <strong>Project Root Directory</strong> on your computer. All files (manuscripts, codebooks, logs, progress states) are read from and written to this local folder directly.</li>
+                    <li>Direct HTTPS requests are sent from your browser to Google Gemini API endpoints using your personal key. No third party (including this website) has access to your credentials or data.</li>
+                  </ul>
+                </div>
+                
+                <div class="onboarding-warning">
+                  <div class="warning-callout">
+                    <h4>Ethical Guideline Notice</h4>
+                    <p>Depending on data confidentiality (e.g. unpublished manuscripts, proprietary datasets, or medical review metadata), it is highly recommended to configure <strong>Vertex AI API keys</strong> inside an enterprise Google Cloud project with disabled data logging to comply with IRB constraints.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="view-footer">
+              <button type="button" id="btn-start-onboarding" class="btn btn-primary">Get Started</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- VIEW 1: Project Initialization -->
+        <div id="view-step-1" class="wizard-view hidden animate-fade-in">
+          <section class="card">
+            <div class="card-header">
+              <h2>Initialize Project Root Directory</h2>
+              <p class="subtitle">Select or create a folder on your computer to store configuration, manuscripts, and results.</p>
+            </div>
+            <div class="card-body">
+              <div class="setup-explanation">
+                <p>When you select a folder, the application will automatically initialize the required subfolders inside it:</p>
+                <div class="folder-tree">
+                  <code>[Your Root Directory]</code><br>
+                  <code>&nbsp;├── manuscripts/ &nbsp; &nbsp; &lt;-- Place PDFs &amp; DOCX files here</code><br>
+                  <code>&nbsp;├── output/ &nbsp; &nbsp; &nbsp; &nbsp; &lt;-- Extraction outputs &amp; logs go here</code><br>
+                  <code>&nbsp;├── codebook.xlsx &nbsp; &lt;-- Extraction variables file</code><br>
+                  <code>&nbsp;└── .extractor_config.json</code>
+                </div>
+              </div>
+
+              <div class="directory-picker-wrapper">
+                <button type="button" id="btn-select-dir" class="btn btn-primary btn-icon">
+                  <svg class="icon" viewBox="0 0 24 24" width="18" height="18">
+                    <path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+                  </svg>
+                  Select Project Folder
+                </button>
+                <span id="selected-dir-name" class="dir-path-display">No folder selected</span>
+              </div>
+
+              <!-- Recent Projects List -->
+              <div id="recent-projects-container" class="recent-projects-box hidden">
+                <h4>Open Recent Project</h4>
+                <ul id="recent-projects-list" class="recent-list">
+                  <!-- Dynamically populated from IndexedDB -->
+                </ul>
+              </div>
+            </div>
+            <div class="view-footer">
+              <button type="button" class="btn btn-secondary btn-prev" data-target="0">Back</button>
+              <button type="button" id="btn-next-step-1" class="btn btn-primary btn-next btn-disabled" data-disabled="true">Next Step</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- VIEW 2: Manuscript Scan & Preview -->
+        <div id="view-step-2" class="wizard-view hidden animate-fade-in">
+          <section class="card">
+            <div class="card-header">
+              <h2>Scan Manuscripts Folder</h2>
+              <p class="subtitle">Place your documents in the <code>/manuscripts</code> directory, then click Scan to read them.</p>
+            </div>
+            <div class="card-body">
+              <div class="scan-actions">
+                <button type="button" id="btn-rescan-files" class="btn btn-secondary btn-icon">
+                  <svg class="icon" viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                  </svg>
+                  Rescan Folder
+                </button>
+                <span id="manuscript-dir-hint" class="helper-hint">Place files in the folder and rescan.</span>
+              </div>
+
+              <!-- Scanned Files List -->
+              <div id="file-list-container" class="file-list-area hidden">
+                <div class="list-header">
+                  <h3>Detected Files in /manuscripts</h3>
+                  <span id="file-count-badge" class="count-badge">0 files</span>
+                </div>
+                <div class="scroll-container">
+                  <table class="file-table">
+                    <thead>
+                      <tr>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>Size (KB)</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="file-list-tbody">
+                      <!-- Dynamically populated -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="view-footer">
+              <button type="button" class="btn btn-secondary btn-prev" data-target="1">Back</button>
+              <button type="button" id="btn-next-step-2" class="btn btn-primary btn-next btn-disabled" data-disabled="true">Next Step</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- VIEW 3: Configure Codebook -->
+        <div id="view-step-3" class="wizard-view hidden animate-fade-in">
+          <section class="card">
+            <div class="card-header flex-header">
+              <div>
+                <h2>Configure Extraction Codebook</h2>
+                <p class="subtitle">Define the target variables to be systematically extracted from each manuscript.</p>
+              </div>
+              <div class="header-actions">
+                <span id="codebook-status-badge" class="status-indicator status-pending">No Codebook Loaded</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- Toolbar -->
+              <div class="grid-toolbar">
+                <div class="toolbar-left">
+                  <button type="button" id="btn-add-variable" class="btn btn-secondary btn-sm">+ Add Variable</button>
+                  <label class="btn btn-secondary btn-sm file-input-label">
+                    📥 Import Excel / CSV
+                    <input type="file" id="input-import-codebook" accept=".xlsx, .xls, .csv" hidden>
+                  </label>
+                  <select id="select-exemplar-template" class="grid-select-sm" style="background: hsla(222, 20%, 15%, 0.8); color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">
+                    <option value="" disabled selected>📚 Load Journal Exemplar...</option>
+                    <option value="journal_childhood">Journal Exemplar: Early Childhood Interventions</option>
+                    <option value="clinical_trial">Journal Exemplar: Standard Clinical Trial</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Grid Container -->
+              <div class="codebook-grid-wrapper">
+                <table class="codebook-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 16%;">Domain</th>
+                      <th style="width: 18%;">Variable</th>
+                      <th style="width: 32%;">Description</th>
+                      <th style="width: 14%;">Example</th>
+                      <th style="width: 14%;">Notes / Questions</th>
+                      <th style="width: 6%; text-align: center;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="codebook-grid-tbody">
+                    <!-- Dynamic variable rows rendered here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="view-footer">
+              <button type="button" class="btn btn-secondary btn-prev" data-target="2">Back</button>
+              <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+                <button type="button" id="btn-save-codebook" class="btn btn-secondary" style="background: linear-gradient(135deg, hsl(262, 85%, 60%), hsl(220, 90%, 56%)); color: #ffffff; border: none; font-weight: 600; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);">💾 Save Codebook to Folder</button>
+                <button type="button" id="btn-next-step-3" class="btn btn-primary btn-next btn-disabled" data-disabled="true">Next Step</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- VIEW 4: Step 4 PDF Conversion & Word-for-Word Verification (Ultra-Clean Main Page) -->
+        <div id="view-step-4" class="wizard-view hidden animate-fade-in">
+          <section class="card" style="margin-bottom: 0.75rem;">
+            <div class="card-header flex-header" style="padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border-color);">
+              <div>
+                <h2 style="font-size: 1.2rem; margin: 0;">Step 4: Manuscript Verification Studio</h2>
+                <p class="subtitle" style="margin: 2px 0 0 0; font-size: 0.8rem;">Select a dedicated review studio below to inspect, verify, and approve manuscript conversions.</p>
+              </div>
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 1rem;">
+              
+              <!-- Ultra-Compact Background Status Bar -->
+              <div class="step4-status-bar" style="background: hsla(222, 20%, 12%, 0.8); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.8rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                  <span title="PDFs waiting in queue to be converted to DOCX">⏳ Awaiting Conversion: <strong id="metric-pdf-waiting" style="color: #fbbf24;">0</strong></span>
+                  <span title="Converted PDFs waiting for human sign-off">👁️ Converted Awaiting Approval: <strong id="metric-pdf-approval" style="color: #60a5fa;">0</strong></span>
+                  <span title="Provided DOCX files waiting for human sign-off">📝 Direct DOCX Awaiting Approval: <strong id="metric-docx-approval" style="color: #a78bfa;">0</strong></span>
+                  <span title="Manuscripts flagged for later review">🚩 Flagged: <strong id="metric-flagged-count" style="color: #f59e0b;">0</strong></span>
+                  <span title="Total manuscripts approved across both direct DOCX and converted PDFs">🎉 Approved: <strong id="metric-total-approved" style="color: #34d399;">0</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span id="worker-status-indicator" style="color: var(--text-muted); font-size: 0.76rem; display: flex; align-items: center; gap: 4px;">
+                    <span>Worker: <strong id="worker-state-text" style="color: #34d399;">Running</strong></span>
+                    <span id="worker-active-file-wrapper" style="color: var(--border-color);">| <span style="color: var(--text-muted);">Active:</span> <strong id="worker-active-file" style="color: #60a5fa;">60_Using_AR.pdf</strong> (<span id="worker-page-progress" style="color: #a78bfa;">Page 2 of 5</span>)</span>
+                  </span>
+                  <button type="button" id="btn-toggle-worker" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px;">⏸️ Pause Worker</button>
+                  <button type="button" id="btn-rescan-verification" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px;" title="Scan project folder for newly added files">🔄 Rescan Folder</button>
+                  <button type="button" id="btn-view-approved" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px; color: #34d399; border-color: hsla(142, 70%, 45%, 0.3);">👁️ View Approved (<span id="btn-approved-count">0</span>)</button>
+                  <button type="button" id="btn-view-flagged" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px; color: #f59e0b; border-color: hsla(38, 92%, 50%, 0.3);">🚩 View Flagged (<span id="btn-flagged-count">0</span>)</button>
+                  <button type="button" id="btn-restart-review" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px; color: #ef4444; border-color: hsla(0, 84%, 60%, 0.3);">🗑️ Restart Review</button>
+                </div>
+              </div>
+
+              <!-- Inline Restart Confirmation Bar -->
+              <div id="restart-confirm-bar" class="hidden" style="background: hsla(0, 60%, 12%, 0.95); border: 1px solid hsla(0, 84%, 50%, 0.4); padding: 10px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 0.82rem; margin-top: -0.5rem;">
+                <span style="color: #fca5a5; font-weight: 600;">⚠️ This will clear all approvals, flags, and conversion progress. Are you sure?</span>
+                <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                  <button type="button" id="btn-restart-confirm" class="btn btn-sm" style="background: #ef4444; color: #fff; border: none; font-size: 0.75rem; padding: 4px 14px; font-weight: 600; border-radius: 4px;">Yes, Restart</button>
+                  <button type="button" id="btn-restart-cancel" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 4px 14px;">Cancel</button>
+                </div>
+              </div>
+
+              <!-- Collapsible Approved Manuscripts Panel -->
+              <div id="approved-manuscripts-panel" class="hidden" style="background: hsla(222, 20%, 9%, 0.95); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; margin-top: -0.5rem; transition: all 0.3s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                  <strong style="color: #34d399; text-transform: uppercase; font-size: 0.8rem; font-weight: 700;">Approved Manuscripts</strong>
+                  <button type="button" id="btn-close-approved-panel" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; padding: 0 4px;">&times;</button>
+                </div>
+                <div id="approved-manuscripts-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
+                  <!-- Dynamically populated approved list items -->
+                </div>
+              </div>
+
+              <!-- Collapsible Flagged Manuscripts Panel -->
+              <div id="flagged-manuscripts-panel" class="hidden" style="background: hsla(222, 20%, 9%, 0.95); border: 1px solid hsla(38, 92%, 50%, 0.25); padding: 1rem; border-radius: var(--radius-md); font-size: 0.82rem; margin-top: -0.5rem; transition: all 0.3s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                  <strong style="color: #f59e0b; text-transform: uppercase; font-size: 0.8rem; font-weight: 700;">🚩 Flagged Manuscripts</strong>
+                  <button type="button" id="btn-close-flagged-panel" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; padding: 0 4px;">&times;</button>
+                </div>
+                <div id="flagged-manuscripts-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px;">
+                  <!-- Dynamically populated flagged list items -->
+                </div>
+              </div>
+
+              <!-- Two Dedicated Studio Launch Cards Grid -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                
+                <!-- Studio Card 1: Direct DOCX Review -->
+                <div style="background: hsla(222, 20%, 10%, 0.9); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.2rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.75rem; position: relative; overflow: hidden; transition: border-color 0.3s ease;">
+                  <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, hsl(262, 85%, 65%), hsl(220, 90%, 56%));"></div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                      <span style="font-size: 0.75rem; font-weight: 700; color: hsl(262, 85%, 65%); text-transform: uppercase; letter-spacing: 0.5px;">Priority 1 Clearance</span>
+                      <span id="badge-direct-docx-count" style="background: hsla(262, 85%, 60%, 0.15); color: hsl(262, 85%, 70%); border: 1px solid hsla(262, 85%, 60%, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">13 Awaiting Review</span>
+                    </div>
+                    <h3 style="color: var(--text-main); margin-bottom: 0.5rem; font-size: 1.15rem;">📝 Review Direct DOCX</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin: 0;">Open a full-screen dedicated reader to inspect directly provided Word documents. Review all pages, headings, tables, and page breaks for immediate sign-off.</p>
+                  </div>
+                  <button type="button" id="btn-open-direct-docx-studio" class="btn btn-primary" style="background: linear-gradient(135deg, hsl(262, 85%, 60%), hsl(220, 90%, 56%)); color: #ffffff; font-weight: 600; padding: 0.75rem 1rem; width: 100%; border: none; font-size: 0.9rem;">📝 Review Direct DOCX</button>
+                </div>
+
+                <!-- Studio Card 2: Converted PDF Side-by-Side Review -->
+                <div style="background: hsla(222, 20%, 10%, 0.9); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.2rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.75rem; position: relative; overflow: hidden; transition: border-color 0.3s ease;">
+                  <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, hsl(142, 70%, 45%), hsl(160, 80%, 40%));"></div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                      <span style="font-size: 0.75rem; font-weight: 700; color: hsl(142, 70%, 45%); text-transform: uppercase; letter-spacing: 0.5px;">Priority 2 Verification</span>
+                      <span id="badge-converted-pdf-count" style="background: hsla(142, 70%, 45%, 0.15); color: #34d399; border: 1px solid hsla(142, 70%, 45%, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">0 Awaiting Review</span>
+                    </div>
+                    <h3 style="color: var(--text-main); margin-bottom: 0.5rem; font-size: 1.15rem;">📄 Review Converted</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin: 0;">Open a full-screen dual-pane workspace to perform side-by-side word-for-word verification comparing original PDFs against converted DOCX documents.</p>
+                  </div>
+                  <button type="button" id="btn-open-converted-pdf-studio" class="btn btn-primary" style="background: linear-gradient(135deg, hsl(142, 70%, 45%), hsl(160, 80%, 40%)); color: #ffffff; font-weight: 600; padding: 0.75rem 1rem; width: 100%; border: none; font-size: 0.9rem;">📄 Review Converted</button>
+                </div>
+
+              </div>
+
+            </div>
+            <div class="view-footer" style="padding: 12px 20px;">
+              <button type="button" class="btn btn-secondary btn-prev" data-target="3">Back to Codebook</button>
+              <button type="button" id="btn-next-step-4" class="btn btn-primary btn-next btn-disabled" data-disabled="true">Next Step (Run Extraction)</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- FULL-SCREEN IMMERSIVE VERIFICATION MODAL STUDIO -->
+        <div id="full-screen-review-modal" class="hidden animate-fade-in" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999; background: hsl(222, 25%, 7%); display: flex; flex-direction: column; overflow: hidden;">
+          
+          <!-- Modal Top Header Toolbar (Ultra-Clean) -->
+          <div style="padding: 12px 24px; background: hsla(222, 20%, 12%, 0.95); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span id="modal-reader-phase-badge" style="background: hsla(262, 85%, 60%, 0.2); color: hsl(262, 85%, 70%); border: 1px solid hsla(262, 85%, 60%, 0.4); padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Direct DOCX Clearance</span>
+              <h3 id="modal-active-filename" style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 600;">Loading manuscript...</h3>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" id="modal-btn-reprocess" class="btn btn-secondary btn-sm" style="color: #60a5fa; border-color: hsla(217, 91%, 60%, 0.3); font-size: 0.8rem; padding: 6px 12px;">⚡ Re-Process PDF</button>
+              <button type="button" id="modal-btn-flag-paper" class="btn btn-secondary btn-sm" style="color: #f59e0b; border-color: hsla(38, 92%, 50%, 0.4); font-size: 0.8rem; padding: 6px 12px;">🚩 Flag for Later</button>
+              <button type="button" id="modal-btn-approve-conversion" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, hsl(142, 70%, 45%), hsl(160, 80%, 40%)); color: #ffffff; border: none; font-weight: 600; padding: 0.6rem 1.2rem; font-size: 0.88rem;">✅ Approve &amp; Next Manuscript</button>
+              <button type="button" id="btn-close-full-screen-modal" class="btn btn-secondary btn-sm" style="font-size: 1.1rem; padding: 4px 10px; margin-left: 8px;" title="Exit studio back to main page">&times; Close</button>
+            </div>
+          </div>
+
+          <!-- Modal Studio Live Progress Bar Strip -->
+          <div style="background: hsla(222, 20%, 9%, 0.95); border-bottom: 1px solid var(--border-color); padding: 6px 24px; display: flex; align-items: center; gap: 16px; font-size: 0.78rem;">
+            <span id="modal-progress-text" style="color: var(--text-main); font-weight: 600; min-width: 260px;">Studio Progress: 0 / 0 Approved (0%)</span>
+            <div style="flex: 1; height: 6px; background: hsla(222, 20%, 18%, 0.8); border-radius: 3px; overflow: hidden; border: 1px solid var(--border-color);">
+              <div id="modal-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, hsl(262, 85%, 60%), hsl(142, 70%, 45%)); transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <!-- Modal Viewport Container (Screen Filling) -->
+          <div id="modal-reader-viewport-container" style="flex: 1; display: grid; grid-template-columns: 280px 1fr 1fr; gap: 16px; padding: 16px; overflow: hidden; background: hsla(222, 20%, 5%, 0.95);">
+            
+            <!-- Left Modal Sidebar: Stats & Navigation -->
+            <div id="modal-sidebar-pane" style="display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: hsla(222, 20%, 8%, 0.9); overflow: hidden; width: 280px; min-width: 280px;">
+              <div style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+                
+                <!-- Stats Box -->
+                <div style="background: hsla(222, 20%, 12%, 0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px;">
+                  <h4 style="margin: 0 0 8px 0; font-size: 0.8rem; color: #a78bfa; text-transform: uppercase; font-weight: 700;">Stats</h4>
+                  <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; color: var(--text-main);">
+                    <div style="display: flex; justify-content: space-between;">
+                      <span>Total Pages:</span>
+                      <strong id="sidebar-total-pages" style="color: #60a5fa;">0</strong>
+                    </div>
+                    <div style="margin-top: 4px; border-top: 1px solid var(--border-color); padding-top: 6px; font-weight: 600;">Words per Page:</div>
+                    <div style="display: flex; justify-content: space-between; padding-left: 8px; color: var(--text-muted); font-size: 0.78rem;">
+                      <span>Min: <strong id="sidebar-words-min" style="color: var(--text-main);">0</strong></span>
+                      <span>Max: <strong id="sidebar-words-max" style="color: var(--text-main);">0</strong></span>
+                      <span>Avg: <strong id="sidebar-words-avg" style="color: var(--text-main);">0</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Navigation Alerts (Anomalies) -->
+                <div style="background: hsla(222, 20%, 12%, 0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px;">
+                  <h4 style="margin: 0 0 8px 0; font-size: 0.8rem; color: #f59e0b; text-transform: uppercase; font-weight: 700;">Flags</h4>
+                  <div id="sidebar-qc-alerts" style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+                    <!-- Alerts dynamically loaded here (e.g. Rotated Pages, Low Word Counts) -->
+                  </div>
+                </div>
+
+                <!-- Headings Navigation -->
+                <div style="background: hsla(222, 20%, 12%, 0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                  <h4 style="margin: 0 0 8px 0; font-size: 0.8rem; color: #34d399; text-transform: uppercase; font-weight: 700;">Headings Navigation</h4>
+                  <div id="sidebar-headings-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; max-height: 280px; padding-right: 4px;">
+                    <!-- Headings dynamically populated here -->
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Left Modal Reader: PDF Source -->
+            <div id="modal-left-reader-pane" class="viewer-pane" style="display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: hsla(222, 20%, 8%, 0.9); overflow: hidden;">
+              <div style="padding: 6px 12px; background: hsla(222, 20%, 14%, 0.9); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.78rem;">
+                <span style="font-weight: 600; color: var(--text-main);">📄 PDF Source Viewer</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="color: var(--text-muted);">Rotate Page:</span>
+                  <select id="pdf-rotate-page-select" style="background: hsla(222, 20%, 10%, 0.8); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;">
+                    <option value="1">Page 1</option>
+                    <option value="2">Page 2</option>
+                    <option value="3">Page 3</option>
+                    <option value="4">Page 4</option>
+                    <option value="5">Page 5</option>
+                  </select>
+                  <button type="button" id="btn-pdf-rotate-trigger" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px; color: #60a5fa; border-color: hsla(217, 91%, 60%, 0.3);">🔄 Rotate 90° &amp; Reprocess</button>
+                </div>
+              </div>
+              <div id="pdf-viewer-content" style="flex: 1; overflow: hidden; background: hsla(222, 20%, 5%, 0.95); display: flex; flex-direction: column;">
+                Auto-loading document pages...
+              </div>
+            </div>
+
+            <!-- Right Modal Reader: DOCX Structure -->
+            <div id="modal-right-reader-pane" class="viewer-pane" style="display: flex; flex-direction: column; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: hsla(222, 20%, 8%, 0.9); overflow: hidden;">
+              <div id="docx-viewer-content" class="scroll-sync-pane" style="flex: 1; padding: 1.5rem; overflow-y: auto; color: var(--text-main); font-size: 0.92rem; font-family: sans-serif; line-height: 1.75;">
+                Auto-loading document pages...
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- VIEW 5: Run Extraction & HITL -->
+        <div id="view-step-5" class="wizard-view hidden animate-fade-in">
+          <section class="card">
+            <div class="card-header">
+              <h2>Extraction Queue & Verification</h2>
+              <p class="subtitle">Verify extraction results in real-time as background processing executes.</p>
+            </div>
+            <div class="card-body">
+              <p class="placeholder-text">Queue and Human-in-the-loop validation interface will be loaded in Phase 5 &amp; 6.</p>
+            </div>
+            <div class="view-footer">
+              <button type="button" class="btn btn-secondary btn-prev" data-target="4">Back</button>
+              <button type="button" id="btn-finish-pipeline" class="btn btn-primary btn-next" disabled>Complete</button>
+            </div>
+          </section>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL: Credentials Manager -->
+  <div id="settings-modal" class="modal hidden animate-fade-in">
+    <div class="modal-content card" id="settings-modal-card">
+      <div class="modal-header">
+        <h2>Credentials &amp; Security Settings</h2>
+        <button id="btn-close-settings" class="btn-close" type="button" aria-label="Close Settings">&times;</button>
+      </div>
+      <form id="api-key-form" class="form-group" style="display: flex; flex-direction: column; height: 100%; margin: 0; overflow: hidden;">
+        <div class="modal-body">
+          
+          <!-- Privacy Banner embedded directly inside credentials -->
+          <div class="security-guarantee-box">
+            <svg class="icon shield-icon" viewBox="0 0 24 24" width="24" height="24">
+              <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 15l-4-4 1.41-1.41L10 13.17l6.59-6.59L18 8l-8 8z"/>
+            </svg>
+            <div class="guarantee-text">
+              <strong>Serverless Client-Only Data Guarantee</strong>
+              <p>Your API key, manuscripts, and variables are stored strictly locally in browser session memory and your selected folder. No data ever touches our servers.</p>
+            </div>
+          </div>
+
+          <div class="platform-tabs">
+            <button type="button" class="tab-btn active" data-platform="aistudio">
+              <span class="tab-title">Google AI Studio</span>
+              <span class="tab-desc">Fast developer setup, perfect for pilots</span>
+            </button>
+            <button type="button" class="tab-btn" data-platform="vertex">
+              <span class="tab-title">Google Cloud Vertex AI</span>
+              <span class="tab-desc">Strict enterprise privacy, IRB compliant</span>
+            </button>
+          </div>
+
+          <!-- Standard API Key Input -->
+          <div class="form-field">
+            <label for="api-key">API Key</label>
+            <div class="password-input-wrapper">
+              <input 
+                type="password" 
+                id="api-key" 
+                placeholder="Enter your API key..." 
+                required 
+                autocomplete="current-password"
+              >
+              <button type="button" id="btn-toggle-key-visibility" class="btn-icon-only" aria-label="Toggle Key Visibility">
+                <svg class="icon eye-icon" viewBox="0 0 24 24" width="20" height="20">
+                  <path class="eye-open" fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  <path class="eye-closed hidden" fill="currentColor" d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.82l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.74-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 2.2 0 4.26-.6 6-1.63l.42.42 2.31 2.31L22 19.27 3.39 2.5 2 4.27zM9.11 11.23l2.88 2.88c-.34.25-.76.39-1.22.39-1.23 0-2.22-.99-2.22-2.22 0-.46.14-.88.39-1.22zM12 9c-.65 0-1.26.13-1.82.36l1.39 1.39c.14-.09.28-.15.43-.15.83 0 1.5.67 1.5 1.5 0 .15-.06.29-.15.43l1.39 1.39c.23-.56.36-1.17.36-1.82 0-2.76-2.24-5-5-5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Vertex AI Specific Fields (Hidden by Default) -->
+          <div id="vertex-fields" class="hidden-fields hidden">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="vertex-project-id">GCP Project ID</label>
+                <input type="text" id="vertex-project-id" placeholder="my-gcp-project-123">
+              </div>
+              <div class="form-field">
+                <label for="vertex-region">GCP Region</label>
+                <input type="text" id="vertex-region" placeholder="us-central1" value="us-central1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Save credentials check -->
+          <div class="form-field checkbox-field">
+            <label for="save-to-dir" class="checkbox-label">
+              <input type="checkbox" id="save-to-dir">
+              <span>Save credentials inside the selected directory</span>
+              <span class="info-tooltip-icon" title="Credentials are saved securely as .extractor_config.json inside your selected project folder.">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              </span>
+            </label>
+          </div>
+          
+          <!-- Help Guides -->
+          <div id="aistudio-help" class="help-text">
+            <details class="help-details">
+              <summary>Need help setting up Google AI Studio? View Guided Steps</summary>
+              <div class="setup-steps">
+                <ol>
+                  <li>Sign in to the <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio Console</a> with your Google Account.</li>
+                  <li>Click the <strong>Get API key</strong> button in the upper-left sidebar.</li>
+                  <li>Click <strong>Create API key</strong>.</li>
+                  <li>Choose either to link it to an existing Google Cloud project or automatically generate a new project.</li>
+                  <li>Copy the generated key (starts with AIzaSy) and paste it into the API Key field above.</li>
+                </ol>
+              </div>
+            </details>
+          </div>
+
+          <div id="vertex-help" class="help-text hidden">
+            <details class="help-details">
+              <summary>Need help setting up Vertex AI? View Guided Steps</summary>
+              <div class="setup-steps">
+                <ol>
+                  <li>Create or select a project in the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>.</li>
+                  <li><a href="https://console.cloud.google.com/apis/library/vertexai.googleapis.com" target="_blank" rel="noopener">Enable the Vertex AI API</a> for your project.</li>
+                  <li>Go to the <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials Page</a>, click <strong>+ Create Credentials</strong>, and select <strong>API Key</strong>.</li>
+                  <li>For safety, click edit on the key, select <strong>Restrict Key</strong> under API Restrictions, and choose <strong>Vertex AI API</strong>. Save the key and paste it above along with your Project ID.</li>
+                </ol>
+              </div>
+            </details>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="submit" id="btn-validate" class="btn btn-primary" style="width: 100%;">
+            Validate Connection
+          </button>
+        </div>
+      </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Parsed Manuscript Preview Modal -->
+  <div id="preview-modal" class="modal hidden animate-fade-in">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h2 id="preview-filename">Manuscript Preview</h2>
+        <button id="btn-close-modal" class="btn-close" type="button" aria-label="Close Preview">&times;</button>
+      </div>
+      <div class="modal-body" id="preview-modal-body">
+        <!-- Dynamically populated sections preview -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div id="api-toast" class="toast hidden"></div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
