@@ -5,3 +5,4 @@ input_docs/*
 output_xlsx/*
 codebook.xlsx
 web-app/node_modules/
+web-app/dist/
