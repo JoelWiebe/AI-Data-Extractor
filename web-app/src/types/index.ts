@@ -1,3 +1,4 @@
+export * from './strategies';
 export type AiGovernanceMode = 'DATA_SHARING_FREE' | 'ENTERPRISE_ZERO_TRAINING';
 
 export type DataResidencyRegion =
@@ -98,6 +99,20 @@ export interface Pass2ExtractedVariable {
   relevantSnippets: string[];
   humanVerifiedValue?: string;
   status: 'pending' | 'verified' | 'flagged';
+  strategyUsed?: string;
+}
+
+export interface ConsensusComparisonItem {
+  variable: string;
+  domain: string;
+  strategyAValue: string; // Heading Classifier
+  strategyBValue: string; // Indexed Search
+  isConsensus: boolean;
+  confidenceA: number;
+  confidenceB: number;
+  justificationA: string;
+  justificationB: string;
+  humanVerifiedValue?: string;
 }
 
 export interface CodebookSnapshot {
