@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Wiebe
+    given-names: Joel P.
+    affiliation: "Crowd Tutor Foundation"
+title: "AI Data Extractor Studio"
+version: 2.0.0
+date-released: 2026-09-30
+url: "https://github.com/JoelWiebe/AI-Data-Extractor"
+institution:
+  name: "Crowd Tutor Foundation"
+license: MIT

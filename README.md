@@ -241,4 +241,6 @@ This project is licensed under the [MIT License](LICENSE.txt). *(Ensure you have
 
 For questions regarding this code, please contact:
 * **Name:** Joel Wiebe
-* **Email:** [joel.wiebe@mail.utoronto.ca](mailto:joel.wiebe@mail.utoronto.ca)
+* **Email:** [joel.p.wiebe@gmail.com](mailto:joel.p.wiebe@gmail.com)
+* **Organization:** Crowd Tutor Foundation
+
